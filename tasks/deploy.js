@@ -1,11 +1,3 @@
-/*
- * grunt-deploy
- * http://zhefeng.github.io/grunt-deploy/
- *
- * Copyright (c) 2013 Zhe Feng
- * Licensed under the MIT license.
- */
-
  'use strict';
 
  module.exports = function(grunt) {

@@ -19,7 +19,23 @@ grunt.loadNpmTasks('grunt-ssh-deploy');
 
 ## The "deploy" task
 
-> create a releases folder on the remote server - a timestamped folder for each release is created here 
+
+
+Your remote server target folder for deployment has following layout:
+
+```shell
+/path/to/deploy +
+                |
+                |- current -> symlink to ./releases/<timestamp> #last deployment
+                |
+                |- releases +
+                            |-<timestamp1> 
+                            |
+                            |-<timestamp2>
+```       
+### Setup
+
+Please create a folder named `mkdir releases` under your deploy target folder. A setup task is not yet provided.
 
 ### Overview
 In your project's Gruntfile, add a section named `deploy` to the data object passed into `grunt.initConfig()`.
