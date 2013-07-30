@@ -58,7 +58,9 @@ grunt.initConfig({
         }],
         cmds_before_deploy: ["some cmds you may want to exec before deploy"],
         cmds_after_deploy: ["forever restart", "some other cmds you want to exec after deploy"],
-        deploy_path: '/path/to/deployment'
+        deploy_path: '/path/to/deployment',
+        // list of folders and files that should be excluded from deployment
+        exclude_list: ['./node_modules/*', './private'] 
       }
     }
   },

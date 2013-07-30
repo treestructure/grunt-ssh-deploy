@@ -74,9 +74,11 @@
       var zipContentForDeployment = function(callback) {
         grunt.log.subhead('-------------------------------ZIPPING FOLDER');
         var excludeList = "";
-        options.exclude_list.map(function(item){
-          excludeList += " --exclude='./" + item + "'";
-        });
+        if (options.exclude_list) {
+          options.exclude_list.map(function(item){
+            excludeList += " --exclude='./" + item + "'";
+          });
+        }
         var command = "tar -czvf deploy.tgz . " + excludeList;
         grunt.log.debug(command);
         child = execLocal(command, options.debug, callback);
