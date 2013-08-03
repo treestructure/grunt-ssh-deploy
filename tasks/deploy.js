@@ -42,9 +42,22 @@
     var execSingleServer = function(server, connection){
       // require local command handling
       var sys = require('sys')
-      var execLocal = require('child_process').exec;
+      var childProcessExec = require('child_process').exec;
       var child;
-
+      
+      var execLocal = function(cmd, next) {
+        var nextFun = next; 
+        childProcessExec(cmd, function(err, stdout, stderr){
+          
+          grunt.log.debug('stdout: ' + stdout);
+          grunt.log.debug('stderr: ' + stderr);
+          if (err !== null) {
+            grunt.log.errorlns('exec error: ' + err);
+          }    
+          nextFun(); 
+        });
+      };
+      
       // executes a remote command via ssh
       var exec = function(cmd, showLog, next){
         connection.exec(cmd, function(err, stream) {
@@ -73,21 +86,21 @@
       // zips local content with respecting exclude list
       var zipContentForDeployment = function(callback) {
         grunt.log.subhead('-------------------------------ZIPPING FOLDER');
-        var excludeList = "";
+        var excludeList = " --exclude='./deploy.tgz'";
         if (options.exclude_list) {
           options.exclude_list.map(function(item){
             excludeList += " --exclude='./" + item + "'";
           });
         }
-        var command = "tar -czvf deploy.tgz . " + excludeList;
+        var command = "tar -czvf deploy.tgz ." + excludeList;
         grunt.log.debug(command);
-        child = execLocal(command, options.debug, callback);
+        execLocal(command, callback);
       };
       // upload zipfile to server via scp
       var uploadZipFile = function(callback) {
         grunt.log.subhead('-------------------------------UPLOAD ZIPFILE');
         var scpAuthString = server.username + "@" + server.host + ":" + options.deploy_path + "/releases/" + timeStamp + '/';
-        var command = "scp ./deploy.tgz " + scpAuthString
+        var command = "scp ./deploy.tgz " + scpAuthString;
         grunt.log.debug(command);
         execLocal(command, callback);
       };
@@ -96,7 +109,7 @@
         grunt.log.subhead('-------------------------------CLEANUP REMOTE');
 
         var goToCurrent = "cd " + options.deploy_path + "/releases/" + timeStamp;
-        var untar = "tar -xzvf deploy.tgz"
+        var untar = "tar -xzvf deploy.tgz";
         var cleanup = "rm " + options.deploy_path + "/releases/" + timeStamp + "/deploy.tgz";
         var command = goToCurrent + " && " + untar + " && " + cleanup;
         grunt.log.debug(command);
@@ -116,7 +129,6 @@
       var localCleanup = function(callback) {
         grunt.log.subhead('-------------------------------CLEANUP LOCAL');
         var command = 'rm deploy.tgz';
-        if (options.debug) command
         grunt.log.debug(command);
         execLocal(command, callback);
       };
@@ -126,10 +138,10 @@
           grunt.log.subhead('-------------------------------EXECUTE POSTDEPLOY COMMANDS');
           var changeToDeployDir = 'cd ' + options.deploy_path + '/releases/' + timeStamp;
           var command = changeToDeployDir + ' && ' + options.cmds_after_deploy;
-          grunt.log.debug(command);
-          exec(command, options.debug);
+          exec(command, options.debug, function(){
+            connection.end();
+          });
         }
-        connection.end();
       };
 
 
