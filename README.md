@@ -18,9 +18,6 @@ grunt.loadNpmTasks('grunt-ssh-deploy');
 ```
 
 ## The "deploy" task
-
-
-
 Your remote server target folder for deployment has following layout:
 
 ```shell
@@ -57,6 +54,7 @@ grunt.initConfig({
           agent: process.env.SSH_AUTH_SOCK
         }],
         cmds_before_deploy: ["some cmds you may want to exec before deploy"],
+        cmds_warmup: ["some cmds to be executed before symlink is switched to new deployment result"],
         cmds_after_deploy: ["forever restart", "some other cmds you want to exec after deploy"],
         deploy_path: '/path/to/deployment',
         // list of folders and files that should be excluded from deployment
@@ -66,16 +64,24 @@ grunt.initConfig({
   },
 })
 ```
+###Current Execution Order
+1. create new folder under releases/
+2. zip local project folder with exclude parameters
+3. upload tgz file to remote
+4. execute warmup commands on remote machine etc. restarting services, delete fragments
+5. switch symlinks to new folder 
+6. execute local cleanup
+7. execute post commands on remote host
+8. close connection
+
 ###Authentication
 currenty password authentication via username and password and agent SSH agent forwarding is possible. 
 With SSH agent forwarding your personal keys can be used for authentication but host aliases are currently not supported
 Please see documentation of [node-SSH2](https://github.com/mscdex/ssh2) plugin.
 
 ### Debugging
-You can look at every step that is executed by `grunt deploy --debug`
+You can have a look inside every step that is executed by using `grunt deploy --debug`
+All local and remote STDOUT and STDERR output will be shown on the console.
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
-
-## Release History
-_(Nothing yet)_

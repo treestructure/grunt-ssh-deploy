@@ -48,7 +48,7 @@
       var execLocal = function(cmd, next) {
         var nextFun = next; 
         childProcessExec(cmd, function(err, stdout, stderr){
-          
+          grunt.log.debug(cmd); 
           grunt.log.debug('stdout: ' + stdout);
           grunt.log.debug('stderr: ' + stderr);
           if (err !== null) {
@@ -94,7 +94,6 @@
           });
         }
         var command = "tar -czvf deploy.tgz ." + excludeList;
-        grunt.log.debug(command);
         execLocal(command, callback);
       };
       // upload zipfile to server via scp
@@ -102,7 +101,6 @@
         grunt.log.subhead('-------------------------------UPLOAD ZIPFILE');
         var scpAuthString = server.username + "@" + server.host + ":" + options.deploy_path + "/releases/" + timeStamp + '/';
         var command = "scp ./deploy.tgz " + scpAuthString;
-        grunt.log.debug(command);
         execLocal(command, callback);
       };
       // unzips on remote and removes zipfolder
@@ -113,9 +111,19 @@
         var untar = "tar -xzvf deploy.tgz";
         var cleanup = "rm " + options.deploy_path + "/releases/" + timeStamp + "/deploy.tgz";
         var command = goToCurrent + " && " + untar + " && " + cleanup;
-        grunt.log.debug(command);
         exec(command, options.debug, callback);
       };
+
+      // executing commands before symlink switch
+      var executeWarmupCommands = function(callback) {
+        if (options.cmds_warmup) {
+          grunt.log.subhead('-------------------------------EXECUTE WARMUP COMMANDS');
+          var changeToDeployDir = 'cd ' + options.deploy_path + '/releases/' + timeStamp;
+          var command = changeToDeployDir + ' && ' + options.cmds_warmup;
+          exec(command, options.debug, callback);
+        }
+      };
+
       // changes symlink to new release folder
       var changeSymLink = function(callback) {
         grunt.log.subhead('-------------------------------SWITCH SYMLINK');
@@ -123,27 +131,29 @@
         var removeCurrent = 'rm -rf ' + options.deploy_path + '/current';
         var setCurrent    = 'ln -s ' + options.deploy_path + '/releases/' + timeStamp + ' ' + options.deploy_path + '/current';
         var command = removeCurrent + " && " + setCurrent;
-        grunt.log.debug(command);
         exec(command, options.debug, callback);
       };
+
       // removing local zipfile
       var localCleanup = function(callback) {
         grunt.log.subhead('-------------------------------CLEANUP LOCAL');
         var command = 'rm deploy.tgz';
-        grunt.log.debug(command);
         execLocal(command, callback);
       };
-
+      
+      // executing post commands on remote machine
       var executePostCommands = function(callback) {
         if (options.cmds_after_deploy) {
           grunt.log.subhead('-------------------------------EXECUTE POSTDEPLOY COMMANDS');
           var changeToDeployDir = 'cd ' + options.deploy_path + '/releases/' + timeStamp;
           var command = changeToDeployDir + ' && ' + options.cmds_after_deploy;
-          grunt.log.debug();
-          exec(command, options.debug, function(){
-            connection.end();
-          });
+          exec(command, options.debug, callback);
         }
+      };
+
+      // closing connection to remote server
+      var closeConnection = function(callback) {
+        connection.end();
       };
 
 
@@ -162,9 +172,11 @@
         zipContentForDeployment,
         uploadZipFile,
         unzipOnRemote,
+        executeWarmupCommands,
         changeSymLink,
         localCleanup,
-        executePostCommands
+        executePostCommands,
+        closeConnection
       ]);
     };
   });
