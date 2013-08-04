@@ -63,6 +63,7 @@
         connection.exec(cmd, function(err, stream) {
           if (err) console.log(err);
           stream.on('data', function(data, extended) {
+            grunt.log.debug((extended === 'stderr' ? 'STDERR: ' : 'STDOUT: ') + data);
           });
           stream.on('end', function() {
             grunt.log.debug('REMOTE: ' + cmd);
@@ -138,6 +139,7 @@
           grunt.log.subhead('-------------------------------EXECUTE POSTDEPLOY COMMANDS');
           var changeToDeployDir = 'cd ' + options.deploy_path + '/releases/' + timeStamp;
           var command = changeToDeployDir + ' && ' + options.cmds_after_deploy;
+          grunt.log.debug();
           exec(command, options.debug, function(){
             connection.end();
           });
