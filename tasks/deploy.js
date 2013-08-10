@@ -111,6 +111,7 @@
         var untar = "tar -xzvf deploy.tgz";
         var cleanup = "rm " + options.deploy_path + "/releases/" + timeStamp + "/deploy.tgz";
         var command = goToCurrent + " && " + untar + " && " + cleanup;
+        console.log(callback)
         exec(command, options.debug, callback);
       };
 
@@ -121,6 +122,9 @@
           var changeToDeployDir = 'cd ' + options.deploy_path + '/releases/' + timeStamp;
           var command = changeToDeployDir + ' && ' + options.cmds_warmup;
           exec(command, options.debug, callback);
+        }
+        else {
+          callback();
         }
       };
 
@@ -148,6 +152,9 @@
           var changeToDeployDir = 'cd ' + options.deploy_path + '/releases/' + timeStamp;
           var command = changeToDeployDir + ' && ' + options.cmds_after_deploy;
           exec(command, options.debug, callback);
+        }
+        else {
+          callback();
         }
       };
 
