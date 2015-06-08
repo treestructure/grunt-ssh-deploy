@@ -7,7 +7,7 @@
 
 
 
-  grunt.registerMultiTask('deploy', 'start deployment of the whole project', function() {
+  grunt.registerMultiTask('deploy', 'start deployment of project via ssh', function() {
     var self = this;
     var done = self.async();
     var Connection = require('ssh2');
@@ -30,7 +30,6 @@
       c.on('error', function(err) {
         console.log("Error on server: " + server.host);
         console.error(err);
-        if (err) {throw err;}
       });
       c.on('close', function(had_error) {
         console.log("Closed connection for server: " + server.host);
