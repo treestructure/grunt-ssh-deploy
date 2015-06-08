@@ -1,15 +1,15 @@
 {
-  "name": "grunt-deploy",
+  "name": "grunt-ssh-deploy",
   "description": "simple capistranoesque deployment of grunt projects to remote servers via symlink switch",
   "version": "0.0.1",
-  "homepage": "http://www.treestructure.de",
+  "homepage": "http://www.treestructure.net",
   "author": {
     "name": "Martin Baum",
-    "email": "martin_baum@gmx.net"
+    "email": "martin.baum@treestructure.net"
   },
   "licenses": [
     {
-      "type": "MIT"
+      "type": "Do want you want"
     }
   ],
   "main": "Gruntfile.js",
@@ -31,7 +31,7 @@
     "grunt": "~0.4.1"
   },
   "keywords": [
-    "gruntplugin ssh deployment"
+    "gruntplugin ssh deployment capistrano"
   ],
   "readmeFilename": "README.md",
   "_id": "grunt-ssh-deploy@0.0.1",
